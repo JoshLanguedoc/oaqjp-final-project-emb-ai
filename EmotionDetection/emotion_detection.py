@@ -8,7 +8,17 @@ def emotion_detector(text_to_analyse):
     header = {"grpc-metadata-mm-model-id": "emotion_aggregated-workflow_lang_en_stock"} #header to send to watson
     myobj = { "raw_document": { "text": text_to_analyse } } #put text to analyse in an object to send
     response = requests.post(url, json = myobj, headers = header, timeout = 5.000) #send request and populate response with
-
+    
+    if response.status_code == 400: #if text_to_analyse is empty...
+        return{ #return a dictionary with emotion keys and all values equal None
+                'anger': None, 
+                'disgust': None,
+                'fear': None,
+                'Joy': None,
+                'sadness': None,
+                'dominant_emotion': None,
+            }
+    
     formatted = json.loads(response.text) #Format json response as python dictionary
 
     emotions = formatted['emotionPredictions'][0]['emotion'] #Grab the emotions dictionary out of the formatted dictionary
@@ -16,10 +26,10 @@ def emotion_detector(text_to_analyse):
     dominant_emotion = 'default' #set dominant_emotion as default
     dominant_value = 0 #set dominant_value as default
 
-    for emotion in emotions: #iterate through eotions
-        if dominant_value < emotions[emotion]: #If dominant_value is less than current emotions value...
+    for emotion, score in emotions.items(): #iterate through eotions
+        if dominant_value < score: #If dominant_value is less than current emotions value...
             dominant_emotion = emotion #Set dominant_emotion to current emotion
-            dominant_value = emotions[emotion] #set dominant value to current emotion value
+            dominant_value = score #set dominant value to current emotion value
 
     response = {}
 
