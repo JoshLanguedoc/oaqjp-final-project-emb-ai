@@ -11,14 +11,18 @@ app = Flask('Emotion Detection') #initialize Flask as 'Emotion Detection'
 def emot_detect():
     '''Pass request arguments to emotion_detector then format and return response'''
     text_to_analyse = request.args.get('textToAnalyze') #set text_to_analyse to request argument 'textToAnalyze'
-    detector_output = emotion_detector(text_to_analyse) #sets response to 
+
+    detector_output = emotion_detector(text_to_analyse) #sets response to
+
+    if detector_output['dominant_emotion'] is None: #if dominant emotion is None...
+        return 'Invalid text! Please try again!.' #return invalid input message
 
     response = "For the given statement, the system response is " #starts forming the response
 
-    for emotion in detector_output: #iterate throuhg detector_output
+    for emotion, score in detector_output.items(): #iterate throuhg detector_output
         if emotion != 'dominant_emotion': #if current emotion is not 'dominant_emotion'...
-            response = response+"'"+emotion+"': "+str(detector_output[emotion])+", " #Append current emotion and value to response
-    
+            response = response+"'"+emotion+"': "+str(score)+", " #Append current emotion and value to response
+
     response = response+". The dominant emotion is "+detector_output['dominant_emotion'] #finish off response by appending dominant emotion phrase
 
     return response, 200 #return response with a success(200) status code
@@ -30,4 +34,3 @@ def render_index():
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port = 5000) #executes the flask app and deploys it on localhost:5000
-    
